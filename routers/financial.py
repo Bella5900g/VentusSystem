@@ -18,29 +18,29 @@ async def create_financial(financial: Financial):
     financial_dict["_id"] = str(result.inserted_id)
     return financial_dict
 
-# Rota para consultar um registro financeiro pelo nome
-@router.get("/financials/{name}", response_model=Financial)
-async def get_financial(name: str):
-    financial = financial_collection.find_one({"name": name})
+# Rota para consultar um registro financeiro pelo type
+@router.get("/financials/{type}", response_model=Financial)
+async def get_financial(type: str):
+    financial = financial_collection.find_one({"type": type})
     if financial is None:
         raise HTTPException(status_code=404, detail="Financial record not found")
     financial["_id"] = str(financial["_id"])  # Converte ObjectId para string
     return financial
 
-# Rota para atualizar um registro financeiro pelo nome
-@router.put("/financials/{name}", response_model=Financial)
-async def update_financial(name: str, updated_financial: Financial):
-    result = financial_collection.update_one({"name": name}, {"$set": updated_financial.dict()})
+# Rota para atualizar um registro financeiro pelo type
+@router.put("/financials/{type}", response_model=Financial)
+async def update_financial(type: str, updated_financial: Financial):
+    result = financial_collection.update_one({"type": type}, {"$set": updated_financial.dict()})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Financial record not found")
-    financial = financial_collection.find_one({"name": name})
+    financial = financial_collection.find_one({"type": type})
     financial["_id"] = str(financial["_id"])  # Converte ObjectId para string
     return financial
 
-# Rota para excluir um registro financeiro pelo nome
-@router.delete("/financials/{name}")
-async def delete_financial(name: str):
-    result = financial_collection.delete_one({"name": name})
+# Rota para excluir um registro financeiro pelo type
+@router.delete("/financials/{type}")
+async def delete_financial(type: str):
+    result = financial_collection.delete_one({"type": type})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Financial record not found")
     return {"message": "Financial record deleted successfully"}

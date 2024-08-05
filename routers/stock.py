@@ -18,26 +18,26 @@ async def create_stock(stock: Stock):
     stock_dict["_id"] = str(result.inserted_id)
     return stock_dict
 
-@router.get("/stocks/{stock_name}", response_model=Stock)
-async def get_stock(stock_name: str):
-    stock = stock_collection.find_one({"name": stock_name})
+@router.get("/stocks/{item_name}", response_model=Stock)
+async def get_stock(item_name: str):
+    stock = stock_collection.find_one({"item_name": item_name})
     if stock is None:
         raise HTTPException(status_code=404, detail="Stock not found")
     stock["_id"] = str(stock["_id"])
     return stock
 
-@router.put("/stocks/{stock_name}", response_model=Stock)
-async def update_stock(stock_name: str, updated_stock: Stock):
-    result = stock_collection.update_one({"name": stock_name}, {"$set": updated_stock.dict()})
+@router.put("/stocks/{item_name}", response_model=Stock)
+async def update_stock(item_name: str, updated_stock: Stock):
+    result = stock_collection.update_one({"item_name": item_name}, {"$set": updated_stock.dict()})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Stock not found")
-    stock = stock_collection.find_one({"name": stock_name})
+    stock = stock_collection.find_one({"item_name": item_name})
     stock["_id"] = str(stock["_id"])
     return stock
 
-@router.delete("/stocks/{stock_name}")
-async def delete_stock(stock_name: str):
-    result = stock_collection.delete_one({"name": stock_name})
+@router.delete("/stocks/{item_name}")
+async def delete_stock(item_name: str):
+    result = stock_collection.delete_one({"item_name": item_name})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Stock not found")
     return {"message": "Stock deleted successfully"}
