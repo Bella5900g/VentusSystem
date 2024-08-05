@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pymongo import MongoClient
 from models.financial import Financial
-from bson import ObjectId
 from typing import List
 import os
 
@@ -11,6 +10,7 @@ client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
 db = client.VentusSystemDB
 financial_collection = db.financials
 
+# Rota para criar um novo registro financeiro
 @router.post("/financials/", response_model=Financial)
 async def create_financial(financial: Financial):
     financial_dict = financial.dict()
@@ -18,34 +18,38 @@ async def create_financial(financial: Financial):
     financial_dict["_id"] = str(result.inserted_id)
     return financial_dict
 
-@router.get("/financials/{financial_id}", response_model=Financial)
-async def get_financial(financial_id: str):
-    financial = financial_collection.find_one({"_id": ObjectId(financial_id)})
+# Rota para consultar um registro financeiro pelo nome
+@router.get("/financials/{name}", response_model=Financial)
+async def get_financial(name: str):
+    financial = financial_collection.find_one({"name": name})
     if financial is None:
         raise HTTPException(status_code=404, detail="Financial record not found")
-    financial["_id"] = str(financial["_id"])
+    financial["_id"] = str(financial["_id"])  # Converte ObjectId para string
     return financial
 
-@router.put("/financials/{financial_id}", response_model=Financial)
-async def update_financial(financial_id: str, updated_financial: Financial):
-    result = financial_collection.update_one({"_id": ObjectId(financial_id)}, {"$set": updated_financial.dict()})
+# Rota para atualizar um registro financeiro pelo nome
+@router.put("/financials/{name}", response_model=Financial)
+async def update_financial(name: str, updated_financial: Financial):
+    result = financial_collection.update_one({"name": name}, {"$set": updated_financial.dict()})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Financial record not found")
-    financial = financial_collection.find_one({"_id": ObjectId(financial_id)})
-    financial["_id"] = str(financial["_id"])
+    financial = financial_collection.find_one({"name": name})
+    financial["_id"] = str(financial["_id"])  # Converte ObjectId para string
     return financial
 
-@router.delete("/financials/{financial_id}")
-async def delete_financial(financial_id: str):
-    result = financial_collection.delete_one({"_id": ObjectId(financial_id)})
+# Rota para excluir um registro financeiro pelo nome
+@router.delete("/financials/{name}")
+async def delete_financial(name: str):
+    result = financial_collection.delete_one({"name": name})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Financial record not found")
     return {"message": "Financial record deleted successfully"}
 
+# Rota para listar todos os registros financeiros
 @router.get("/financials/", response_model=List[Financial])
 async def list_financials():
     financials = []
     for financial in financial_collection.find():
-        financial["_id"] = str(financial["_id"])
+        financial["_id"] = str(financial["_id"])  # Converte ObjectId para string
         financials.append(financial)
     return financials

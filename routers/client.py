@@ -11,6 +11,7 @@ client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
 db = client.VentusSystemDB
 client_collection = db.clients
 
+# Rota para criar um novo cliente
 @router.post("/clients/", response_model=Client)
 async def create_client(client: Client):
     client_dict = client.dict()
@@ -18,34 +19,38 @@ async def create_client(client: Client):
     client_dict["_id"] = str(result.inserted_id)
     return client_dict
 
-@router.get("/clients/{client_id}", response_model=Client)
-async def get_client(client_id: str):
-    client = client_collection.find_one({"_id": ObjectId(client_id)})
+# Rota para consultar um cliente pelo nome
+@router.get("/clients/{name}", response_model=Client)
+async def get_client(name: str):
+    client = client_collection.find_one({"name": name})
     if client is None:
         raise HTTPException(status_code=404, detail="Client not found")
-    client["_id"] = str(client["_id"])
+    client["_id"] = str(client["_id"])  # Converte ObjectId para string
     return client
 
-@router.put("/clients/{client_id}", response_model=Client)
-async def update_client(client_id: str, updated_client: Client):
-    result = client_collection.update_one({"_id": ObjectId(client_id)}, {"$set": updated_client.dict()})
+# Rota para atualizar um cliente pelo nome
+@router.put("/clients/{name}", response_model=Client)
+async def update_client(name: str, updated_client: Client):
+    result = client_collection.update_one({"name": name}, {"$set": updated_client.dict()})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Client not found")
-    client = client_collection.find_one({"_id": ObjectId(client_id)})
-    client["_id"] = str(client["_id"])
+    client = client_collection.find_one({"name": name})
+    client["_id"] = str(client["_id"])  # Converte ObjectId para string
     return client
 
-@router.delete("/clients/{client_id}")
-async def delete_client(client_id: str):
-    result = client_collection.delete_one({"_id": ObjectId(client_id)})
+# Rota para excluir um cliente pelo nome
+@router.delete("/clients/{name}")
+async def delete_client(name: str):
+    result = client_collection.delete_one({"name": name})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Client not found")
     return {"message": "Client deleted successfully"}
 
+# Rota para listar todos os clientes
 @router.get("/clients/", response_model=List[Client])
 async def list_clients():
     clients = []
     for client in client_collection.find():
-        client["_id"] = str(client["_id"])
+        client["_id"] = str(client["_id"])  # Converte ObjectId para string
         clients.append(client)
     return clients
