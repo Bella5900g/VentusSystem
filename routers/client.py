@@ -44,7 +44,7 @@ async def delete_client(name: str):
     result = client_collection.delete_one({"name": name})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Client not found")
-    return {"message": "Client deleted successfully"}
+    return {"message": "Cliente deletado com sucesso"}
 
 # Rota para listar todos os clientes
 @router.get("/clients/", response_model=List[Client])

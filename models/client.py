@@ -7,4 +7,5 @@ class Client(BaseModel):
     address: str
     phone: str
     email: EmailStr
+    # CPF: int = ("000.000.000-00");
     service_history: Optional[List[str]] = []
