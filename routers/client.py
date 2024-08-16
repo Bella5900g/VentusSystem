@@ -24,7 +24,7 @@ async def create_client(client: Client):
 async def get_client(name: str):
     client = client_collection.find_one({"name": name})
     if client is None:
-        raise HTTPException(status_code=404, detail="Client not found")
+        raise HTTPException(status_code=404, detail="Cliente não encontrado")
     client["_id"] = str(client["_id"])  # Converte ObjectId para string
     return client
 
@@ -33,7 +33,7 @@ async def get_client(name: str):
 async def update_client(name: str, updated_client: Client):
     result = client_collection.update_one({"name": name}, {"$set": updated_client.dict()})
     if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Client not found")
+        raise HTTPException(status_code=404, detail="Cliente não encontrado")
     client = client_collection.find_one({"name": name})
     client["_id"] = str(client["_id"])  # Converte ObjectId para string
     return client
@@ -43,7 +43,7 @@ async def update_client(name: str, updated_client: Client):
 async def delete_client(name: str):
     result = client_collection.delete_one({"name": name})
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Client not found")
+        raise HTTPException(status_code=404, detail="Cliente não encontrado")
     return {"message": "Cliente deletado com sucesso"}
 
 # Rota para listar todos os clientes
