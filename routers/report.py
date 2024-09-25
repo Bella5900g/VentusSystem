@@ -22,6 +22,8 @@ async def generate_report(report_type: str, name: str = None):
     elif report_type == "appointments":
         data = list(db.appointments.find({"name": name})) if name else list(db.appointments.find())
     elif report_type == "financials":
+        data = list(db.vendas.find({"name": name})) if name else list(db.vendas.find())
+    elif report_type == "vendas":
         data = list(db.financials.find({"name": name})) if name else list(db.financials.find())
     else:
         raise HTTPException(status_code=400, detail="Invalid report type")
