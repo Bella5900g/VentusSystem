@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import client, service, technician, stock, appointment, financial, report
+from routers import vendas
 
 app = FastAPI()
 
@@ -20,5 +21,6 @@ app.include_router(stock.router, prefix="/api/v1")
 app.include_router(appointment.router, prefix="/api/v1")
 app.include_router(financial.router, prefix="/api/v1")
 app.include_router(report.router, prefix="/api/v1")
+app.include_router(vendas.router, prefix="/api/v1")
 
 # Executar o servidor: uvicorn main:app --reload
