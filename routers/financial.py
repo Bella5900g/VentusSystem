@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from models.financial import Financial
 from typing import List
 import os
+from fastapi import status
 
 router = APIRouter()
 
@@ -11,7 +12,7 @@ db = client.VentusSystemDB
 financial_collection = db.financials
 
 # Rota para criar um novo registro financeiro
-@router.post("/financials/", response_model=Financial)
+@router.post("/financials/", response_model=Financial, status_code=status.HTTP_201_CREATED)
 async def create_financial(financial: Financial):
     financial_dict = financial.dict()
     result = financial_collection.insert_one(financial_dict)

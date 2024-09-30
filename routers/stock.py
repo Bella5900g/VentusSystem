@@ -4,6 +4,7 @@ from models.stock import Stock
 from bson import ObjectId
 from typing import List
 import os
+from fastapi import status
 
 router = APIRouter()
 
@@ -11,12 +12,15 @@ client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
 db = client.VentusSystemDB
 stock_collection = db.stocks
 
-@router.post("/stocks/", response_model=Stock)
+
+# Rota para criar um novo item de estoque
+@router.post("/stocks/", response_model=Stock, status_code=status.HTTP_201_CREATED)
 async def create_stock(stock: Stock):
     stock_dict = stock.dict()
     result = stock_collection.insert_one(stock_dict)
     stock_dict["_id"] = str(result.inserted_id)
     return stock_dict
+
 
 @router.get("/stocks/{item_name}", response_model=Stock)
 async def get_stock(item_name: str):

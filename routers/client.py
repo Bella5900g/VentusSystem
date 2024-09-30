@@ -4,6 +4,7 @@ from models.client import Client
 from bson import ObjectId
 from typing import List
 import os
+from fastapi import status
 
 router = APIRouter()
 
@@ -11,8 +12,9 @@ client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
 db = client.VentusSystemDB
 client_collection = db.clients
 
+
 # Rota para criar um novo cliente
-@router.post("/clients/", response_model=Client)
+@router.post("/clients/", response_model=Client, status_code=status.HTTP_201_CREATED)
 async def create_client(client: Client):
     client_dict = client.dict()
     result = client_collection.insert_one(client_dict)

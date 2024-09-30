@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from models.report import Report
 from typing import List
 import os
+from fastapi import status
 
 router = APIRouter()
 

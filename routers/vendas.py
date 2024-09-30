@@ -25,6 +25,28 @@ def get_next_id():
     )
     return counter["seq_value"]
 
+# Rota para buscar uma venda por ID
+@router.get("/vendas/{venda_id}", response_model=Venda)
+async def get_venda_by_id(venda_id: str):
+    try:
+        # Verifica se o venda_id é um ObjectId válido
+        if ObjectId.is_valid(venda_id):
+            venda = vendas_collection.find_one({"_id": ObjectId(venda_id)})
+        else:
+            # Se não for um ObjectId, trata como um ID string normal
+            venda = vendas_collection.find_one({"_id": venda_id})
+
+        if not venda:
+            raise HTTPException(status_code=404, detail="Venda não encontrada")
+
+        # Retorna a venda encontrada
+        return Venda(**venda)
+
+    except Exception as e:
+        # Loga o erro para depuração e retorna um erro de servidor
+        print(f"Erro ao buscar a venda: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erro ao buscar a venda")
+
 @router.get("/vendas", response_model=List[Venda])
 async def get_all_vendas():
     vendas = list(vendas_collection.find())
@@ -50,6 +72,11 @@ async def update_venda(venda_id: str, venda_atualizada: Venda):
 
         # Atualiza os itens da venda com os novos produtos e recalcula o valor total
         venda_obj = Venda(**venda_existente)
+
+        # Verifica se o nome do cliente (client_id) foi passado e atualiza
+        if venda_atualizada.client_id:
+            venda_obj.client_id = venda_atualizada.client_id  # Atualiza o nome do cliente
+
         venda_obj.products = venda_atualizada.products  # Atualiza a lista de produtos
         venda_obj.calculate_total()  # Recalcula o total da venda com os novos produtos
 
@@ -57,10 +84,11 @@ async def update_venda(venda_id: str, venda_atualizada: Venda):
         produtos_dict = [produto.dict() for produto in venda_obj.products]  # Converte a lista de produtos para dicionário
         venda_dict = venda_obj.dict()  # Converte a venda completa para dicionário
 
-        # Atualiza a venda no banco de dados
+        # Atualiza a venda no banco de dados, incluindo o nome do cliente se alterado
         vendas_collection.update_one(
             {"_id": venda_id},
             {"$set": {
+                "client_id": venda_obj.client_id,  # Atualiza o nome do cliente no banco de dados
                 "products": produtos_dict,
                 "total_value": venda_dict["total_value"]
             }}
@@ -71,6 +99,7 @@ async def update_venda(venda_id: str, venda_atualizada: Venda):
         # Logando o erro para ajudar na depuração
         print(f"Erro ao atualizar a venda: {str(e)}")
         raise HTTPException(status_code=500, detail="Erro interno ao atualizar a venda")
+
 
 @router.put("/vendas/{venda_id}/finalizar", response_model=Venda)
 async def finalizar_venda(venda_id: str):
