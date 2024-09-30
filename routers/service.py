@@ -4,6 +4,7 @@ from models.service import Service
 from bson import ObjectId
 from typing import List
 import os
+from fastapi import status
 
 router = APIRouter()
 
@@ -11,13 +12,15 @@ client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
 db = client.VentusSystemDB
 service_collection = db.services
 
+
 # Rota para criar um novo serviço
-@router.post("/services/", response_model=Service)
+@router.post("/services/", response_model=Service, status_code=status.HTTP_201_CREATED)
 async def create_service(service: Service):
     service_dict = service.dict()
     result = service_collection.insert_one(service_dict)
     service_dict["_id"] = str(result.inserted_id)
     return service_dict
+
 
 # Rota para consultar um serviço pelo tipo
 @router.get("/services/{type}", response_model=Service)

@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from models.appointment import Appointment
 from typing import List
 import os
+from fastapi import status
 
 router = APIRouter()
 
@@ -11,7 +12,7 @@ db = client.VentusSystemDB
 appointment_collection = db.appointments
 
 # Rota para criar um novo compromisso
-@router.post("/appointments/", response_model=Appointment)
+@router.post("/appointments/", response_model=Appointment, status_code=status.HTTP_201_CREATED)
 async def create_appointment(appointment: Appointment):
     appointment_dict = appointment.dict()
     result = appointment_collection.insert_one(appointment_dict)

@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from models.technician import Technician
 from typing import List
 import os
+from fastapi import status
 
 router = APIRouter()
 
@@ -11,12 +12,13 @@ db = client.VentusSystemDB
 technician_collection = db.technicians
 
 # Rota para criar um novo técnico
-@router.post("/technicians/", response_model=Technician)
+@router.post("/technicians/", response_model=Technician, status_code=status.HTTP_201_CREATED)
 async def create_technician(technician: Technician):
     technician_dict = technician.dict()
     result = technician_collection.insert_one(technician_dict)
     technician_dict["_id"] = str(result.inserted_id)
     return technician_dict
+
 
 # Rota para consultar um técnico pelo nome
 @router.get("/technicians/{name}", response_model=Technician)
