@@ -5,6 +5,7 @@ import os
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
+from typing import Optional
 
 # Conexão com o MongoDB
 client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
@@ -29,7 +30,7 @@ def get_next_id():
 @router.get("/vendas/{venda_id}", response_model=Venda)
 async def get_venda_by_id(venda_id: str):
     try:
-        # Verifica se o venda_id é um ObjectId válido
+        # Verifica se a venda_id é um ObjectId válido
         if ObjectId.is_valid(venda_id):
             venda = vendas_collection.find_one({"_id": ObjectId(venda_id)})
         else:
@@ -101,11 +102,16 @@ async def update_venda(venda_id: str, venda_atualizada: Venda):
         raise HTTPException(status_code=500, detail="Erro interno ao atualizar a venda")
 
 
+
 @router.put("/vendas/{venda_id}/finalizar", response_model=Venda)
 async def finalizar_venda(venda_id: str):
     venda = vendas_collection.find_one({"_id": venda_id})
     if not venda:
         raise HTTPException(status_code=404, detail="Venda não encontrada")
+    
+     # Verifica se a venda já foi finalizada
+    if venda.get("status") == "completed":
+        raise HTTPException(status_code=400, detail="A venda já foi finalizada e não pode ser finalizada novamente.")
     
     # Atualiza o status para 'completed' e define a data de finalização no formato brasileiro
     venda_obj = Venda(**venda)
